@@ -176,6 +176,17 @@ namespace Chinesechess
             game.UndoMove();
             RefreshUI();
         }
+        private void Restart_Click(object sender, RoutedEventArgs e)
+        {
+            var result = MessageBox.Show("Sure to RESTART?", "Hint", MessageBoxButton.YesNo);
+            if (result == MessageBoxResult.Yes)
+            {
+                game.ResetGame();
+                selectedPoint = null;
+                RefreshUI();
+                StatusLabel.Text = "GAME has Restarted, now: Red";
+            }
+        }
         private void DrawBoardLines()
         {
             BoardCanvas.Children.Clear();

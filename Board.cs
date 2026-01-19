@@ -174,6 +174,13 @@ namespace Chinesechess
 
             CurrentTurn = lastMove.PlayerSide;
         }
+        public void ResetGame()
+        {
+            Array.Clear(Grid, 0, Grid.Length);
+            moveHistory.Clear();
+            CurrentTurn = Side.Red;
+            InitBoard();
+        }
         public (int x, int y) FindGeneral(Side side)
         {
             for (int y = 0; y < 10; y++)

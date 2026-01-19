@@ -21,6 +21,11 @@
                         Margin="20,0,0,0"
                         Padding="15,5"
                         Cursor="Hand"/>
+                <Button Content="Restart"
+                        Click="Restart_Click"
+                        Margin="10,0,0,0"
+                        Padding="15,5"
+                        Cursor="Hand"/>
             </StackPanel>
         </Border>
 
