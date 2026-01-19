@@ -1,6 +1,6 @@
 using System;
 
-namespace ChineseChessGUI
+namespace Chinesechess
 {
     public enum Side { Red, Black }
     public enum PieceType { Chariot, Horse, Elephant, Advisor, General, Cannon, Soldier }
