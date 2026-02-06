@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\16011\\Desktop\\ConsoleApp1\\Chinesechess\\Chinesechess.csproj",
+      "projectUniqueName": "E:\\Projects\\Chinesechess\\Chinesechess.csproj",
       "projectName": "Chinesechess",
-      "projectPath": "C:\\Users\\16011\\Desktop\\ConsoleApp1\\Chinesechess\\Chinesechess.csproj",
+      "projectPath": "E:\\Projects\\Chinesechess\\Chinesechess.csproj",
       "packagesPath": "C:\\Users\\16011\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\16011\\Desktop\\ConsoleApp1\\Chinesechess\\obj\\",
+      "outputPath": "E:\\Projects\\Chinesechess\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\16011\\AppData\\Roaming\\NuGet\\NuGet.Config"
