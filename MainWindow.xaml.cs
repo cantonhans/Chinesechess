@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Data;
+using System.Windows.Input;
 
 namespace Chinesechess
 {
@@ -130,6 +131,15 @@ namespace Chinesechess
                         RefreshUI();
                     }
                 }
+            }
+        }
+
+        private void ChessGrid_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (selectedPoint != null)
+            {
+                selectedPoint = null;
+                RefreshUI();
             }
         }
         private void ShowValidMoves(Piece p)

@@ -113,7 +113,8 @@
                          Width="450"
                          Height="500"
                          Background="Transparent"
-                         Panel.ZIndex="1"/>
+                         Panel.ZIndex="1"
+                         MouseRightButtonDown="ChessGrid_MouseRightButtonDown"/>
         </Grid>
     </DockPanel>
 </Window>
