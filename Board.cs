@@ -147,7 +147,7 @@ namespace Chinesechess
                         var targetPiece = Grid[tx, ty];
 
                         Grid[tx, ty] = p;
-                        Grid[oldX, oldY] = null;
+                        Grid[oldX, oldY] = null!;
                         p.X = tx; p.Y = ty;
 
                         bool stillInCheck = IsInCheck(p.Color);
