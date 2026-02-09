@@ -68,7 +68,13 @@ namespace Chinesechess
             template.VisualTree = border;
 
             Trigger mouseOverTrigger = new Trigger { Property = Button.IsMouseOverProperty, Value = true };
-            mouseOverTrigger.Setters.Add(new Setter(Button.OpacityProperty, 0.8));
+            mouseOverTrigger.Setters.Add(new Setter(Button.OpacityProperty, 0.7));
+
+            mouseOverTrigger.Setters.Add(new Setter(Button.BackgroundProperty,
+                new SolidColorBrush(Color.FromArgb(200, 255, 255, 255))));
+            // mouseOverTrigger.Setters.Add(new Setter(Button.BackgroundProperty, Brushes.AntiqueWhite));
+            mouseOverTrigger.Setters.Add(new Setter(Button.BorderBrushProperty, Brushes.OrangeRed));
+
             template.Triggers.Add(mouseOverTrigger);
 
             return template;
@@ -104,6 +110,12 @@ namespace Chinesechess
                 }
                 else
                 {
+                    if (game.IsInCheck(game.CurrentTurn))
+                    {
+                        MessageLabel.Text = "Invalid Move: Your General is still under attack!";
+                        MessageLabel.Foreground = Brushes.Red;
+                    }
+
                     Piece targetPiece = game.Grid[x, y];
                     if (targetPiece != null && targetPiece.Color == game.CurrentTurn)
                     {
@@ -163,10 +175,33 @@ namespace Chinesechess
                     }
                 }
             }
-            StatusLabel.Text = $"Current: {(game.CurrentTurn == Side.Red ? "Red" : "Black")}";
+
+            if (game.CurrentTurn == Side.Red)
+            {
+                TopBar.Background = new SolidColorBrush(Color.FromRgb(150, 0, 0));
+            }
+            else
+            {
+                TopBar.Background = new SolidColorBrush(Color.FromRgb(40, 40, 40));
+            }
+            StatusLabel.Text = $"Turn: {(game.CurrentTurn == Side.Red ? "Red" : "Black")}";
+
+            var last = game.GetLastMove();
+            if (last != null)
+            {
+                var p = game.Grid[last.Value.ToX, last.Value.ToY];
+                string pieceName = p?.GetName() ?? "";
+                MessageLabel.Text = $"Last move: {last.Value.PlayerSide} {pieceName} ({last.Value.FromX},{last.Value.FromY}) -> ({last.Value.ToX},{last.Value.ToY})";
+                MessageLabel.Foreground = Brushes.LightGray;
+            }
+
             if (game.IsInCheck(game.CurrentTurn))
             {
-                StatusLabel.Text += " [Checkmate!]";
+                MessageLabel.Text = "⚠️ CHECK! You must protect your General!";
+                MessageLabel.Foreground = Brushes.OrangeRed;
+
+                var (gx, gy) = game.FindGeneral(game.CurrentTurn);
+                if (gx != -1) buttons[gx, gy].Background = Brushes.Pink;
             }
         }
 
@@ -189,25 +224,33 @@ namespace Chinesechess
         private void DrawBoardLines()
         {
             BoardCanvas.Children.Clear();
+
             double step = 50;
+            double startX = 10;
+            double startY = 10;
+
             for (int i = 0; i < 10; i++)
             {
-                AddLine(0, i * step, 400, i * step);
+                AddLine(startX, startY + i * step, startX + 400, startY + i * step);
             }
+
             for (int i = 0; i < 9; i++)
             {
-                AddLine(i * step, 0, i * step, 200);
-                AddLine(i * step, 250, i * step, 450);
+                AddLine(startX + i * step, startY, startX + i * step, startY + 200);
+                AddLine(startX + i * step, startY + 250, startX + i * step, startY + 450);
             }
 
-            AddLine(0, 0, 0, 450);
-            AddLine(400, 0, 400, 450);
+            AddLine(startX, startY, startX, startY + 450);
+            AddLine(startX + 400, startY, startX + 400, startY + 450);
 
-            AddLine(150, 0, 250, 100); AddLine(250, 0, 150, 100);
-            AddLine(150, 350, 250, 450); AddLine(250, 350, 150, 450);
+            AddLine(startX + 150, startY, startX + 250, startY + 100);
+            AddLine(startX + 250, startY, startX + 150, startY + 100);
 
-            AddText("楚 河", 60, 210);
-            AddText("汉 界", 260, 210);
+            AddLine(startX + 150, startY + 350, startX + 250, startY + 450);
+            AddLine(startX + 250, startY + 350, startX + 150, startY + 450);
+
+            AddText("楚 河", startX + 60, startY + 210);
+            AddText("汉 界", startX + 260, startY + 210);
         }
 
         private void AddLine(double x1, double y1, double x2, double y2)

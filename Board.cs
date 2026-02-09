@@ -11,6 +11,12 @@ namespace Chinesechess
             public Side PlayerSide;
         }
 
+        public MoveRecord? GetLastMove()
+        {
+            if (moveHistory.Count == 0) return null;
+            return moveHistory.Peek();
+        }
+
         private void InitBoard()
         {
             AddPiece(new Piece(PieceType.Chariot, Side.Red, 0, 9));

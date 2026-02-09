@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace ChineseChessGUI;
+namespace ChineseChess;
 
 public partial class App : Application
 {

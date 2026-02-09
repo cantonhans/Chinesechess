@@ -5,31 +5,100 @@
         Height="750"
         Width="600"
         Background="#f4d793">
+
+    <Window.Resources>
+        <Style x:Key="MenuButtonStyle"
+               TargetType="Button">
+            <Setter Property="Background"
+                    Value="#33FFFFFF"/>
+            <Setter Property="Foreground"
+                    Value="White"/>
+            <Setter Property="BorderThickness"
+                    Value="1"/>
+            <Setter Property="BorderBrush"
+                    Value="#55FFFFFF"/>
+            <Setter Property="Padding"
+                    Value="15,6"/>
+            <Setter Property="Margin"
+                    Value="10,0,0,0"/>
+            <Setter Property="Cursor"
+                    Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver"
+                                     Value="True">
+                                <Setter TargetName="border"
+                                        Property="Background"
+                                        Value="#66FFFFFF"/>
+                                <Setter TargetName="border"
+                                        Property="BorderBrush"
+                                        Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed"
+                                     Value="True">
+                                <Setter TargetName="border"
+                                        Property="Background"
+                                        Value="#22000000"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <DockPanel>
-        <Border DockPanel.Dock="Top"
+        <Border x:Name="TopBar"
+                DockPanel.Dock="Top"
                 Background="#333"
-                Padding="10">
-            <StackPanel Orientation="Horizontal">
+                Padding="15,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
                 <TextBlock x:Name="StatusLabel"
-                           Text="Red"
+                           Text="Turn: Red"
                            Foreground="White"
-                           FontSize="18"
-                           VerticalAlignment="Center"
-                           Margin="10,0"/>
-                <Button Content="Undo"
-                        Click="Undo_Click"
-                        Margin="20,0,0,0"
-                        Padding="15,5"
-                        Cursor="Hand"/>
-                <Button Content="Restart"
-                        Click="Restart_Click"
-                        Margin="10,0,0,0"
-                        Padding="15,5"
-                        Cursor="Hand"/>
-            </StackPanel>
+                           FontSize="20"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"/>
+
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal">
+                    <Button Content="Undo"
+                            Click="Undo_Click"
+                            Style="{StaticResource MenuButtonStyle}"/>
+                    <Button Content="Restart"
+                            Click="Restart_Click"
+                            Style="{StaticResource MenuButtonStyle}"/>
+                </StackPanel>
+            </Grid>
         </Border>
 
-        <Grid Margin="40"
+        <Border DockPanel.Dock="Top"
+                Background="#444"
+                Padding="6">
+            <TextBlock x:Name="MessageLabel"
+                       Text="Welcome! Red's turn."
+                       Foreground="#ccc"
+                       FontSize="13"
+                       HorizontalAlignment="Center"
+                       FontStyle="Italic"/>
+        </Border>
+
+        <Grid Margin="20"
               HorizontalAlignment="Center"
               VerticalAlignment="Center">
 
@@ -43,12 +112,8 @@
                          Columns="9"
                          Width="450"
                          Height="500"
-                         HorizontalAlignment="Left"
-                         VerticalAlignment="Top"
-                         Margin="-25,-25,0,0"
                          Background="Transparent"
                          Panel.ZIndex="1"/>
         </Grid>
-
     </DockPanel>
 </Window>
