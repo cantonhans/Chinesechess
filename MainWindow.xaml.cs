@@ -73,7 +73,6 @@ namespace Chinesechess
 
             mouseOverTrigger.Setters.Add(new Setter(Button.BackgroundProperty,
                 new SolidColorBrush(Color.FromArgb(200, 255, 255, 255))));
-            // mouseOverTrigger.Setters.Add(new Setter(Button.BackgroundProperty, Brushes.AntiqueWhite));
             mouseOverTrigger.Setters.Add(new Setter(Button.BorderBrushProperty, Brushes.OrangeRed));
 
             template.Triggers.Add(mouseOverTrigger);
@@ -108,6 +107,13 @@ namespace Chinesechess
                 {
                     selectedPoint = null;
                     RefreshUI();
+                    if (game.IsCheckmate(game.CurrentTurn))
+                    {
+                        string winner = (game.CurrentTurn == Side.Red) ? "Black" : "Red";
+                        MessageLabel.Text = $"{winner} WIN!";
+                        MessageLabel.Foreground = Brushes.Gold;
+                        MessageBox.Show($"Checkmate! {winner} Wins!", "Game Over");
+                    }
                 }
                 else
                 {
@@ -144,18 +150,14 @@ namespace Chinesechess
         }
         private void ShowValidMoves(Piece p)
         {
-            for (int y = 0; y < 10; y++)
+            var legalMoves = game.GetLegalMoves(p);
+
+            foreach (var move in legalMoves)
             {
-                for (int x = 0; x < 9; x++)
+                buttons[move.x, move.y].Background = new SolidColorBrush(Color.FromArgb(100, 144, 238, 144));
+                if (game.Grid[move.x, move.y] == null)
                 {
-                    if (game.IsValidMove(p, x, y))
-                    {
-                        buttons[x, y].Background = new SolidColorBrush(Color.FromArgb(100, 144, 238, 144));
-                        if (game.Grid[x, y] == null)
-                        {
-                            buttons[x, y].BorderBrush = Brushes.LightGray;
-                        }
-                    }
+                    buttons[move.x, move.y].BorderBrush = Brushes.LightGray;
                 }
             }
         }
@@ -207,9 +209,11 @@ namespace Chinesechess
 
             if (game.IsInCheck(game.CurrentTurn))
             {
-                MessageLabel.Text = "⚠️ CHECK! You must protect your General!";
-                MessageLabel.Foreground = Brushes.OrangeRed;
-
+                if (!game.IsCheckmate(game.CurrentTurn))
+                {
+                    MessageLabel.Text = "⚠️ CHECK! You must protect your General!";
+                    MessageLabel.Foreground = Brushes.OrangeRed;
+                }
                 var (gx, gy) = game.FindGeneral(game.CurrentTurn);
                 if (gx != -1) buttons[gx, gy].Background = Brushes.Pink;
             }

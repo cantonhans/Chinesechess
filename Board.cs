@@ -1,9 +1,17 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Chinesechess
 {
     public class Board
     {
         public Piece[,] Grid = new Piece[9, 10];
+        public Side CurrentTurn { get; private set; } = Side.Red;
+        private Stack<MoveRecord> moveHistory = new Stack<MoveRecord>();
+
         public Board() { InitBoard(); }
+
         public struct MoveRecord
         {
             public int FromX, FromY, ToX, ToY;
@@ -11,11 +19,7 @@ namespace Chinesechess
             public Side PlayerSide;
         }
 
-        public MoveRecord? GetLastMove()
-        {
-            if (moveHistory.Count == 0) return null;
-            return moveHistory.Peek();
-        }
+        public MoveRecord? GetLastMove() => moveHistory.Count == 0 ? null : moveHistory.Peek();
 
         private void InitBoard()
         {
@@ -31,6 +35,7 @@ namespace Chinesechess
             AddPiece(new Piece(PieceType.Cannon, Side.Red, 1, 7));
             AddPiece(new Piece(PieceType.Cannon, Side.Red, 7, 7));
             for (int i = 0; i < 9; i += 2) AddPiece(new Piece(PieceType.Soldier, Side.Red, i, 6));
+
             AddPiece(new Piece(PieceType.Chariot, Side.Black, 0, 0));
             AddPiece(new Piece(PieceType.Horse, Side.Black, 1, 0));
             AddPiece(new Piece(PieceType.Elephant, Side.Black, 2, 0));
@@ -46,6 +51,7 @@ namespace Chinesechess
         }
 
         private void AddPiece(Piece p) => Grid[p.X, p.Y] = p;
+
         public bool IsValidMove(Piece p, int targetX, int targetY)
         {
             if (targetX < 0 || targetX > 8 || targetY < 0 || targetY > 9) return false;
@@ -72,8 +78,7 @@ namespace Chinesechess
                 case PieceType.Cannon:
                     if (p.X != targetX && p.Y != targetY) return false;
                     int count = CountPiecesBetween(p.X, p.Y, targetX, targetY);
-                    if (targetPiece == null) return count == 0;
-                    return count == 1;
+                    return targetPiece == null ? count == 0 : count == 1;
 
                 case PieceType.Elephant:
                     if (dx != 2 || dy != 2) return false;
@@ -84,16 +89,16 @@ namespace Chinesechess
                 case PieceType.Advisor:
                     if (dx != 1 || dy != 1) return false;
                     if (targetX < 3 || targetX > 5) return false;
-                    if (p.Color == Side.Red && targetY < 7) return false;
-                    if (p.Color == Side.Black && targetY > 2) return false;
-                    return true;
+                    return p.Color == Side.Red ? targetY >= 7 : targetY <= 2;
 
                 case PieceType.General:
+                    if (targetPiece != null && targetPiece.Type == PieceType.General)
+                    {
+                        if (p.X == targetX && CountPiecesBetween(p.X, p.Y, targetX, targetY) == 0) return true;
+                    }
                     if (dx + dy != 1) return false;
                     if (targetX < 3 || targetX > 5) return false;
-                    if (p.Color == Side.Red && targetY < 7) return false;
-                    if (p.Color == Side.Black && targetY > 2) return false;
-                    return true;
+                    return p.Color == Side.Red ? targetY >= 7 : targetY <= 2;
 
                 case PieceType.Soldier:
                     if (dx + dy != 1) return false;
@@ -120,20 +125,54 @@ namespace Chinesechess
                 for (int y = Math.Min(y1, y2) + 1; y < Math.Max(y1, y2); y++)
                     if (Grid[x1, y] != null) count++;
             }
-            else
+            else if (y1 == y2)
             {
                 for (int x = Math.Min(x1, x2) + 1; x < Math.Max(x1, x2); x++)
                     if (Grid[x, y1] != null) count++;
             }
             return count;
         }
+        public List<(int x, int y)> GetLegalMoves(Piece p)
+        {
+            var legalMoves = new List<(int x, int y)>();
+            if (p == null) return legalMoves;
 
-        public Side CurrentTurn { get; private set; } = Side.Red;
+            for (int ty = 0; ty < 10; ty++)
+            {
+                for (int tx = 0; tx < 9; tx++)
+                {
+                    if (IsValidMove(p, tx, ty))
+                    {
+                        int oldX = p.X, oldY = p.Y;
+                        var targetPiece = Grid[tx, ty];
+
+                        Grid[tx, ty] = p;
+                        Grid[oldX, oldY] = null;
+                        p.X = tx; p.Y = ty;
+
+                        bool stillInCheck = IsInCheck(p.Color);
+
+                        p.X = oldX; p.Y = oldY;
+                        Grid[oldX, oldY] = p;
+                        Grid[tx, ty] = targetPiece;
+
+                        if (!stillInCheck)
+                        {
+                            legalMoves.Add((tx, ty));
+                        }
+                    }
+                }
+            }
+            return legalMoves;
+        }
 
         public bool MovePiece(int x1, int y1, int x2, int y2)
         {
             Piece p = Grid[x1, y1];
-            if (p == null || p.Color != CurrentTurn || !IsValidMove(p, x2, y2)) return false;
+            if (p == null || p.Color != CurrentTurn) return false;
+
+            var legalMoves = GetLegalMoves(p);
+            if (!legalMoves.Any(m => m.x == x2 && m.y == y2)) return false;
 
             var record = new MoveRecord
             {
@@ -149,35 +188,39 @@ namespace Chinesechess
             Grid[x1, y1] = null!;
             p.X = x2; p.Y = y2;
 
-            if (IsInCheck(CurrentTurn))
-            {
-                p.X = x1; p.Y = y1;
-                Grid[x1, y1] = p;
-                Grid[x2, y2] = record.CapturedPiece;
-                return false;
-            }
-
             moveHistory.Push(record);
             CurrentTurn = (CurrentTurn == Side.Red) ? Side.Black : Side.Red;
             return true;
         }
-        private Stack<MoveRecord> moveHistory = new Stack<MoveRecord>();
+        public bool IsCheckmate(Side side)
+        {
+            if (!IsInCheck(side)) return false;
+
+            for (int y = 0; y < 10; y++)
+            {
+                for (int x = 0; x < 9; x++)
+                {
+                    var p = Grid[x, y];
+                    if (p != null && p.Color == side)
+                    {
+                        if (GetLegalMoves(p).Count > 0) return false;
+                    }
+                }
+            }
+            return true;
+        }
 
         public void UndoMove()
         {
             if (moveHistory.Count == 0) return;
-
             var lastMove = moveHistory.Pop();
             Piece p = Grid[lastMove.ToX, lastMove.ToY];
-
             Grid[lastMove.FromX, lastMove.FromY] = p;
-            p.X = lastMove.FromX;
-            p.Y = lastMove.FromY;
-
+            p.X = lastMove.FromX; p.Y = lastMove.FromY;
             Grid[lastMove.ToX, lastMove.ToY] = lastMove.CapturedPiece;
-
             CurrentTurn = lastMove.PlayerSide;
         }
+
         public void ResetGame()
         {
             Array.Clear(Grid, 0, Grid.Length);
@@ -185,6 +228,7 @@ namespace Chinesechess
             CurrentTurn = Side.Red;
             InitBoard();
         }
+
         public (int x, int y) FindGeneral(Side side)
         {
             for (int y = 0; y < 10; y++)
@@ -200,6 +244,8 @@ namespace Chinesechess
         public bool IsInCheck(Side victimSide)
         {
             var (genX, genY) = FindGeneral(victimSide);
+            if (genX == -1) return false;
+
             Side attackerSide = (victimSide == Side.Red) ? Side.Black : Side.Red;
 
             for (int y = 0; y < 10; y++)
