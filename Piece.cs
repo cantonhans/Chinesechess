@@ -1,5 +1,3 @@
-using System;
-
 namespace Chinesechess
 {
     public enum Side { Red, Black }
